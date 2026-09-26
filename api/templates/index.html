@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Samsung PRISM GenAI Hackathon - Smart Guided Troubleshooting Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --samsung-blue: #0c4da2;
+      --samsung-navy: #031e40;
+      --samsung-glow: #1a73e8;
+      --bg-dark: #090d16;
+      --card-bg: #111827;
+      --card-border: #1f293d;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent-green: #10b981;
+      --accent-yellow: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-cyan: #06b6d4;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: linear-gradient(135deg, #031e40 0%, #0c4da2 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .badge-prism {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(8px);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--accent-green);
+      color: #34d399;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent-green);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.2); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    main {
+      flex: 1;
+      max-width: 1300px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      display: grid;
+      grid-template-columns: 460px 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 960px) {
+      main { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #e5e7eb;
+    }
+
+    .quick-queries {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .chip {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+      padding: 0.4rem 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .chip:hover {
+      background: #0c4da2;
+      border-color: #3b82f6;
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+    textarea, input {
+      width: 100%;
+      background: #0b1120;
+      border: 1px solid #273549;
+      border-radius: 0.6rem;
+      padding: 0.75rem 1rem;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+    textarea:focus, input:focus {
+      border-color: var(--samsung-glow);
+      box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.25);
+    }
+    textarea { resize: vertical; min-height: 90px; }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #0c4da2 0%, #1a73e8 100%);
+      color: white;
+      border: none;
+      border-radius: 0.6rem;
+      padding: 0.85rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(26, 115, 232, 0.4);
+    }
+    .btn-submit:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .telemetry-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--card-border);
+    }
+    .metric-box {
+      background: #090d16;
+      border: 1px solid #1f293d;
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      text-align: center;
+    }
+    .metric-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .metric-val {
+      font-size: 1.1rem;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      color: #38bdf8;
+      margin-top: 0.2rem;
+    }
+
+    /* Output Results styling */
+    .goal-banner {
+      background: linear-gradient(135deg, rgba(12, 77, 162, 0.2) 0%, rgba(26, 115, 232, 0.1) 100%);
+      border: 1px solid #1e3a8a;
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .goal-tag {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 800;
+      color: #60a5fa;
+      margin-bottom: 0.25rem;
+    }
+    .goal-text {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .steps-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .step-item {
+      background: #0b1120;
+      border: 1px solid #1e293b;
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      display: grid;
+      grid-template-columns: 48px 1fr auto;
+      gap: 1rem;
+      align-items: center;
+      transition: border 0.2s;
+    }
+    .step-item:hover {
+      border-color: #3b82f6;
+    }
+    .step-num {
+      width: 44px;
+      height: 44px;
+      background: #1e293b;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      color: #60a5fa;
+      border: 2px solid #334155;
+    }
+    .step-num.destructive {
+      border-color: var(--accent-red);
+      color: var(--accent-red);
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .step-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f3f4f6;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .step-desc {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-top: 0.2rem;
+    }
+    .step-uri {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.08);
+      padding: 0.15rem 0.5rem;
+      border-radius: 0.3rem;
+      margin-top: 0.4rem;
+    }
+
+    .btn-bixby {
+      background: #031e40;
+      border: 1px solid #1d4ed8;
+      color: #bfdbfe;
+      padding: 0.5rem 0.9rem;
+      border-radius: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-bixby:hover {
+      background: #1d4ed8;
+      color: #fff;
+    }
+
+    .pill-safe {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      font-size: 0.68rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+      font-weight: 700;
+    }
+    .pill-destructive {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      font-size: 0.68rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+      font-weight: 700;
+    }
+
+    .validation-box {
+      margin-top: 1.5rem;
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+    }
+    .val-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #22d3ee;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .val-outcome {
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      margin-top: 0.25rem;
+    }
+
+    .fallback-card {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      background: #0b1120;
+      border: 1px dashed #334155;
+      border-radius: 0.75rem;
+    }
+    .fallback-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    pre.json-viewer {
+      background: #060910;
+      border: 1px solid #1f293d;
+      border-radius: 0.6rem;
+      padding: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: #a5f3fc;
+      overflow-x: auto;
+      max-height: 420px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: #1e293b;
+      border-color: #334155;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span class="badge-prism">SAMSUNG PRISM 3RD EDITION</span>
+      <h1>Smart Guided Troubleshooting Engine</h1>
+    </div>
+    <div class="status-pill" id="healthPill">
+      <div class="status-dot"></div>
+      <span id="healthText">Pre-Warmed & Ready</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Left Column: Controls & Telemetry -->
+    <div>
+      <div class="card">
+        <div class="section-title">
+          <span>⚡ Live Query Tester</span>
+        </div>
+
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+          Select a sample benchmark or type any custom complaint:
+        </p>
+
+        <div class="quick-queries">
+          <button class="chip" onclick="setQuery('battery is draining fast on my phone')">🔋 Battery Drain</button>
+          <button class="chip" onclick="setQuery('phn btry draining super fast please help')">💬 Slang/Typo Drain</button>
+          <button class="chip" onclick="setQuery('battery bahut jaldi khatam ho raha hai')">🇮🇳 Hinglish Drain</button>
+          <button class="chip" onclick="setQuery('screen flickering and 120hz stutter')">📱 Display 120Hz</button>
+          <button class="chip" onclick="setQuery('camera app crashed and taking blurry photos')">📷 Camera Failure</button>
+          <button class="chip" onclick="setQuery('phone lagging and overheating after update')">🚀 Performance Lag</button>
+          <button class="chip" onclick="setQuery('wifi disconnecting and network dropped')">📶 Network Reset</button>
+          <button class="chip" onclick="setQuery('how to bake chocolate fudge cake')">🧁 Fallback Test</button>
+        </div>
+
+        <form id="troubleshootForm" onsubmit="submitQuery(event)">
+          <div class="form-group">
+            <label for="queryInput">USER RAW COMPLAINT</label>
+            <textarea id="queryInput" placeholder="Enter problem (e.g. battery draining fast, camera crashed...)" required>battery is draining fast on my galaxy phone</textarea>
+          </div>
+          <div class="form-group">
+            <label for="siisInput">SIIS RESPONSE CONTEXT (OPTIONAL)</label>
+            <input type="text" id="siisInput" placeholder="Optional SIIS semantic intent response">
+          </div>
+          <button type="submit" class="btn-submit" id="submitBtn">
+            <span>Diagnose & Generate Plan</span>
+            <span>➔</span>
+          </button>
+        </form>
+
+        <div class="telemetry-bar">
+          <div class="metric-box">
+            <div class="metric-label">Latency</div>
+            <div class="metric-val" id="latVal">-- ms</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Cache Hit</div>
+            <div class="metric-val" id="cacheVal">--</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">SLA Target</div>
+            <div class="metric-val" style="color: #10b981;">&le; 300ms</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Cost (USD)</div>
+            <div class="metric-val" id="costVal">$0.000</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Engine Evaluation Proof Box -->
+      <div class="card" style="margin-top: 1.5rem;">
+        <div class="section-title">
+          <span>🛡️ Jury Evaluation Gates</span>
+        </div>
+        <ul style="font-size: 0.8rem; color: #cbd5e1; list-style: none; display: flex; flex-direction: column; gap: 0.5rem;">
+          <li>✅ <strong>Zero Web URL Leaks:</strong> Strictly <code>bixby://</code> URIs permitted.</li>
+          <li>✅ <strong>Pydantic v2 Contract:</strong> Strict schema validation on Goal, Action, StepGroup.</li>
+          <li>✅ <strong>Title Syntax:</strong> Exactly 2-3 words in sentence case.</li>
+          <li>✅ <strong>Description Syntax:</strong> Exactly 5-7 words starting with "It will...".</li>
+          <li>✅ <strong>Safe Plan Ordering:</strong> Destructive operations placed strictly last.</li>
+          <li>✅ <strong>Fast-Path Cache:</strong> Sub-5ms retrieval (&le; 300 ms SLA).</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Right Column: Interactive Visualizer & JSON Raw Output -->
+    <div class="card">
+      <div class="tabs">
+        <button class="tab-btn active" id="tabPlanBtn" onclick="switchTab('plan')">📋 Visual Plan</button>
+        <button class="tab-btn" id="tabJsonBtn" onclick="switchTab('json')">{ } Pure JSON</button>
+      </div>
+
+      <!-- Visual Plan Tab -->
+      <div id="planTab">
+        <div id="resultContent">
+          <div style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
+            <p style="font-size: 1.1rem; font-weight: 600;">Engine Ready</p>
+            <p style="font-size: 0.85rem; margin-top: 0.5rem;">Submit a complaint or click a quick benchmark to generate a guided plan.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pure JSON Tab -->
+      <div id="jsonTab" style="display: none;">
+        <pre class="json-viewer" id="jsonOutput">/* Pure JSON response will be displayed here */</pre>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function setQuery(text) {
+      document.getElementById('queryInput').value = text;
+      document.getElementById('troubleshootForm').dispatchEvent(new Event('submit'));
+    }
+
+    function switchTab(tab) {
+      const planTab = document.getElementById('planTab');
+      const jsonTab = document.getElementById('jsonTab');
+      const tabPlanBtn = document.getElementById('tabPlanBtn');
+      const tabJsonBtn = document.getElementById('tabJsonBtn');
+
+      if (tab === 'plan') {
+        planTab.style.display = 'block';
+        jsonTab.style.display = 'none';
+        tabPlanBtn.classList.add('active');
+        tabJsonBtn.classList.remove('active');
+      } else {
+        planTab.style.display = 'none';
+        jsonTab.style.display = 'block';
+        tabJsonBtn.classList.add('active');
+        tabPlanBtn.classList.remove('active');
+      }
+    }
+
+    async function checkHealth() {
+      try {
+        const res = await fetch('/health');
+        const data = await res.json();
+        if (data.status === 'ok') {
+          document.getElementById('healthText').textContent = `Ready (${data.indexed_deeplinks} DeepLinks)`;
+        }
+      } catch (e) {
+        console.error("Health check error", e);
+      }
+    }
+
+    async function submitQuery(e) {
+      if (e) e.preventDefault();
+      const query = document.getElementById('queryInput').value.trim();
+      const siis = document.getElementById('siisInput').value.trim() || null;
+      const submitBtn = document.getElementById('submitBtn');
+      const resultContent = document.getElementById('resultContent');
+      const jsonOutput = document.getElementById('jsonOutput');
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span>Processing...</span>`;
+
+      try {
+        const res = await fetch('/v1/troubleshoot', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: query, siis_response: siis })
+        });
+        const data = await res.json();
+
+        // Update Telemetry
+        document.getElementById('latVal').textContent = `${data.meta.latency_ms} ms`;
+        document.getElementById('latVal').style.color = data.meta.latency_ms <= 300 ? '#10b981' : '#f59e0b';
+        document.getElementById('cacheVal').textContent = data.meta.cache_hit ? 'HIT ⚡' : 'MISS (Retrieved)';
+        document.getElementById('cacheVal').style.color = data.meta.cache_hit ? '#38bdf8' : '#cbd5e1';
+        document.getElementById('costVal').textContent = `$${data.meta.cost_usd.toFixed(4)}`;
+
+        // Update Pure JSON Viewer
+        jsonOutput.textContent = JSON.stringify(data, null, 2);
+
+        // Render Visual Plan
+        if (data.fallback === 'no match') {
+          resultContent.innerHTML = `
+            <div class="fallback-card">
+              <div class="fallback-icon">🔍</div>
+              <h3 style="font-size: 1.1rem; color: #f87171; margin-bottom: 0.5rem;">Out of Scope Query</h3>
+              <p style="font-size: 0.85rem; color: #94a3b8; max-width: 480px; margin: 0 auto;">
+                No matching Samsung One UI settings or troubleshooting deep links found for this complaint. Clean fallback activated without hallucination.
+              </p>
+              <div style="margin-top: 1rem; font-family: monospace; font-size: 0.75rem; color: #ef4444;">
+                fallback: "no match" | contexts: []
+              </div>
+            </div>
+          `;
+        } else {
+          let stepsHtml = '';
+          data.steps.forEach(step => {
+            const isDestructive = step.is_destructive || step.invasive_level === 3;
+            stepsHtml += `
+              <div class="step-item">
+                <div class="step-num ${isDestructive ? 'destructive' : ''}">${step.step_number}</div>
+                <div>
+                  <div class="step-title">
+                    <span>${step.title}</span>
+                    <span class="${isDestructive ? 'pill-destructive' : 'pill-safe'}">
+                      ${isDestructive ? 'Phase 3: Destructive' : 'Phase 1: Non-Invasive'}
+                    </span>
+                  </div>
+                  <div class="step-desc">${step.description}</div>
+                  <div class="step-uri">${step.uri}</div>
+                </div>
+                <a href="${step.uri}" class="btn-bixby" onclick="alert('Triggering Bixby URI: ${step.uri}')">
+                  <span>⚡ Launch</span>
+                </a>
+              </div>
+            `;
+          });
+
+          let valHtml = '';
+          if (data.validation) {
+            valHtml = `
+              <div class="validation-box">
+                <div class="val-title">
+                  <span>🔍 Post-Fix Validation Step: ${data.validation.title}</span>
+                </div>
+                <div class="val-outcome">${data.validation.description} &bull; Expected: ${data.validation.expected_outcome}</div>
+                <div class="step-uri" style="margin-top: 0.5rem;">${data.validation.uri}</div>
+              </div>
+            `;
+          }
+
+          resultContent.innerHTML = `
+            <div class="goal-banner">
+              <div class="goal-tag">Verified Troubleshooting Goal</div>
+              <div class="goal-text">${data.goal}</div>
+            </div>
+            <div class="steps-container">
+              ${stepsHtml}
+            </div>
+            ${valHtml}
+          `;
+        }
+
+      } catch (err) {
+        resultContent.innerHTML = `<div style="color: #ef4444; padding: 1rem;">Error: ${err.message}</div>`;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span>Diagnose & Generate Plan</span><span>➔</span>`;
+      }
+    }
+
+    checkHealth();
+    // Auto-run first query on load
+    submitQuery();
+  </script>
+</body>
+</html>

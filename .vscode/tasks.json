@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Troubleshoot Server",
+      "type": "shell",
+      "command": "python -m uvicorn api.app:app --host 127.0.0.1 --port 8000 --reload",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Run Benchmarks",
+      "type": "shell",
+      "command": "python benchmark/run_benchmarks.py",
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "Run Unit Tests",
+      "type": "shell",
+      "command": "python -m unittest discover -s tests -p 'test_*.py'",
+      "problemMatcher": [],
+      "group": "test"
+    }
+  ]
+}
