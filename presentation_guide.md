@@ -11,10 +11,10 @@ Use this comprehensive blueprint to populate your presentation slides in Microso
 - **Header:** Theme 2: Smart Guided Troubleshooting Engine
 - **Sub-header:** Samsung PRISM GenAI Hackathon (3rd Edition - Year 2026)
 - **Team Metadata:**
-  - Team Name: `[Your Team Name]`
-  - College / University: `[Your College Name]`
-  - Team Members: `[Student 1, Student 2, Student 3]`
-  - Project Repository: `https://github.com/[YourOrg]/samsung-prism-troubleshoot-engine`
+  - Team Name: `QUARK`
+  - College / University: `SRMIST KTR`
+  - Team Members: `AMRITESH ANAND (anandamritesh2006@gmail.com), HIMANSHU (raohimanshu0008@gmail.com)`
+  - Project Repository: `https://github.com/amriteshand/Samsung-Prism-QUARK`
   - Release Tag: `PRISM_GENAI_HACKATHON_Y2026`
 
 ---
@@ -99,3 +99,7 @@ Use this comprehensive blueprint to populate your presentation slides in Microso
   - Sub-millisecond execution with guaranteed safe ordering.
 - **Official Release Tag:** `PRISM_GENAI_HACKATHON_Y2026`
 - **Thank You & Q&A**
+
+
+
+

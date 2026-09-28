@@ -113,7 +113,7 @@ flowchart TD
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/amriteshand/Samsung-Prism-CODE-RANGERS.git
+git clone https://github.com/amriteshand/Samsung-Prism-QUARK.git
 cd samsung-prism-troubleshoot-engine
 
 # 2. Build and run containerized microservice
@@ -251,4 +251,6 @@ As specified in the hackathon guidelines, create the official release tag on you
 git tag -a PRISM\_GENAI\_HACKATHON\_Y2026 -m "Final submission for Samsung PRISM GenAI Hackathon 3rd Edition - Theme 2"
 git push origin PRISM\_GENAI\_HACKATHON\_Y2026
 ```
+
+
 
