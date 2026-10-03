@@ -252,5 +252,9 @@ git tag -a PRISM\_GENAI\_HACKATHON\_Y2026 -m "Final submission for Samsung PRISM
 git push origin PRISM\_GENAI\_HACKATHON\_Y2026
 ```
 
+## Demo Video
+
+[Watch the QUARK Demo Video](https://youtu.be/-hZ8IOeW3uM?si=aCNysKrz9TzgemDf)
+
 
 
